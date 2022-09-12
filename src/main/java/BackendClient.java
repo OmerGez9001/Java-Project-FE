@@ -46,7 +46,7 @@ public class BackendClient {
         });
 
         DecodedJWT decodedJWT = JWT.decode(jwt.getAccessToken());
-        workerInformation = new WorkerInformation(jwt, decodedJWT.getClaims().get("roles").asList(Job.class), decodedJWT.getClaims().get("shop").as(Long.class));
+        workerInformation = new WorkerInformation(jwt, decodedJWT.getClaims().get("roles").asList(Job.class), decodedJWT.getClaims().get("shop").as(Long.class),username);
     }
 
     @SneakyThrows
@@ -253,5 +253,6 @@ public class BackendClient {
         private Jwt jwt;
         private List<Job> jobs;
         private Long shopId;
+        private String connectedWorkerName;
     }
 }

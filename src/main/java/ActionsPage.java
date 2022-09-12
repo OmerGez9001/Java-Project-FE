@@ -7,12 +7,14 @@ public class ActionsPage extends JFrame {
     private JButton currentShopInformationButton;
     private JButton customerInformationButton;
     private JButton logsButton;
+    private JButton chatButton;
 
     public ActionsPage() throws HeadlessException {
         workersButton.addActionListener(e -> WorkersPage.instance());
         currentShopInformationButton.addActionListener(e -> ShopPage.instance());
         customerInformationButton.addActionListener(e -> CustomerPage.instance());
         logsButton.addActionListener(e -> LogPage.instance());
+        chatButton.addActionListener(e -> ChatPage.instance());
 
         if (!BackendClient.instance.getWorkerInformation().getJobs().contains(Job.ADMIN))
             workersButton.setVisible(false);
