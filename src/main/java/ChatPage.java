@@ -94,7 +94,7 @@ public class ChatPage extends JFrame {
 
     public static JFrame instance() {
         ChatPage jFrame = new ChatPage();
-        jFrame.setContentPane(new ChatPage().chatPanel);
+        jFrame.setContentPane(jFrame.chatPanel);
         jFrame.pack();
         jFrame.setVisible(true);
         return jFrame;
