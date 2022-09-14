@@ -19,11 +19,11 @@ public class ChatPage extends JFrame {
     private JTextField messageText;
     private JButton sendButton;
 
-    public ChatPage(){
+    public ChatPage() {
         initialize();
     }
 
-    private void initialize(){
+    private void initialize() {
         String userName = BackendClient.instance.getWorkerInformation().getConnectedWorkerName();
         WebSocketClient client = new StandardWebSocketClient();
         WebSocketStompClient stompClient = new WebSocketStompClient(client);
@@ -48,15 +48,17 @@ public class ChatPage extends JFrame {
                     StompSession session, StompHeaders connectedHeaders) {
                 // Subscribe to the Public Topic
                 session.subscribe("/topic/public", this);
+                session.subscribe("/user/queue/specific-user", this);
                 // Tell your username to the server
-               // session.send("/app/chat.register",userName);
+                // session.send("/app/chat.register",userName);
                 sendButton.addActionListener(e -> {
                     Message message = new Message();
                     message.setSender(userName);
                     message.setContent(messageText.getText());
                     message.setType(Message.MessageType.CHAT);
-                    session.send("/app/chat.send", message);
-                   messageArea.append(message.getSender() + ": " + message.getContent() + "\n");
+//                    session.send("/app/chat.send", message);
+                    session.send("/app/secured/room", message);
+                    messageArea.append(message.getSender() + ": " + message.getContent() + "\n");
                 });
 
             }
@@ -78,15 +80,13 @@ public class ChatPage extends JFrame {
     }
 
 
+    public void onMessageReceived(Message message) {
 
-    public void onMessageReceived(Message message){
-
-        if(message.getType() == Message.MessageType.JOIN) {
+        if (message.getType() == Message.MessageType.JOIN) {
 
         } else if (message.getType() == Message.MessageType.LEAVE) {
 
-        }
-        else {
+        } else {
 
         }
 
