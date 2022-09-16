@@ -50,7 +50,7 @@ public class BackendClient {
         });
 
         DecodedJWT decodedJWT = JWT.decode(jwt.getAccessToken());
-        workerInformation = new WorkerInformation(jwt, decodedJWT.getClaims().get("roles").asList(Job.class), decodedJWT.getClaims().get("shop").as(Long.class));
+        workerInformation = new WorkerInformation(jwt, decodedJWT.getClaims().get("roles").asList(Job.class), decodedJWT.getClaims().get("shop").as(Long.class),username);
     }
 
     @SneakyThrows
@@ -121,6 +121,21 @@ public class BackendClient {
         HttpClient client = HttpClient.newHttpClient();
         UriComponents uriComponents = UriComponentsBuilder.fromUri(URI.create(baseUrl + "/api/shop"))
                 .path("/" + shopId)
+                .build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uriComponents.toUri())
+                .header("Authorization", "Bearer " + workerInformation.getJwt().getAccessToken())
+                .header("Content-Type", "application/json")
+                .GET()
+                .build();
+        return objectMapper.readValue(client.send(request, HttpResponse.BodyHandlers.ofString()).body(), new TypeReference<>() {
+        });
+    }
+
+    @SneakyThrows
+    public List<Shop> getShops() {
+        HttpClient client = HttpClient.newHttpClient();
+        UriComponents uriComponents = UriComponentsBuilder.fromUri(URI.create(baseUrl + "/api/shop"))
                 .build();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uriComponents.toUri())
@@ -257,5 +272,6 @@ public class BackendClient {
         private Jwt jwt;
         private List<Job> jobs;
         private Long shopId;
+        private String connectedWorkerName;
     }
 }

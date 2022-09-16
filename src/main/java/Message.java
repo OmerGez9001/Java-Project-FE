@@ -2,6 +2,7 @@ import lombok.Data;
 
 @Data
 public class Message {
-    private String from;
-    private String text;
+    private String content;
+    private Long shopId;
+    private String sender;
 }

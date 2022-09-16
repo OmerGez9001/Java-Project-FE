@@ -14,11 +14,11 @@ public class ActionsPage extends JFrame {
         currentShopInformationButton.addActionListener(e -> ShopPage.instance());
         customerInformationButton.addActionListener(e -> CustomerPage.instance());
         logsButton.addActionListener(e -> LogPage.instance());
+
         logoutButton.addActionListener(e -> {
             LoginPage.instance();
             BackendClient.instance.disconnect();
             this.dispose();
-
         });
 
         if (!BackendClient.instance.getWorkerInformation().getJobs().contains(Job.ADMIN))
