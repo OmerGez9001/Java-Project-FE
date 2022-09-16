@@ -8,12 +8,14 @@ public class ActionsPage extends JFrame {
     private JButton customerInformationButton;
     private JButton logsButton;
     private JButton logoutButton;
+    private JButton chatButton;
 
     public ActionsPage() throws HeadlessException {
         workersButton.addActionListener(e -> WorkersPage.instance());
         currentShopInformationButton.addActionListener(e -> ShopPage.instance());
         customerInformationButton.addActionListener(e -> CustomerPage.instance());
         logsButton.addActionListener(e -> LogPage.instance());
+        chatButton.addActionListener(e -> ChatPage.instance());
 
         logoutButton.addActionListener(e -> {
             LoginPage.instance();
