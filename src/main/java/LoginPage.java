@@ -20,6 +20,8 @@ public class LoginPage extends JFrame {
         jFrame.setContentPane(jFrame.panel1);
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.pack();
+        jFrame.setLocationRelativeTo(null);
+        jFrame.setSize(250,150);
         jFrame.setVisible(true);
         return jFrame;
     }
