@@ -2,6 +2,6 @@ import lombok.Data;
 
 @Data
 public class Shop {
-    private long id;
+    private Long id;
     private String shopName;
 }

@@ -129,6 +129,21 @@ public class BackendClient {
     }
 
     @SneakyThrows
+    public List<Shop> getShops() {
+        HttpClient client = HttpClient.newHttpClient();
+        UriComponents uriComponents = UriComponentsBuilder.fromUri(URI.create(baseUrl + "/api/shop"))
+                .build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uriComponents.toUri())
+                .header("Authorization", "Bearer " + workerInformation.getJwt().getAccessToken())
+                .header("Content-Type", "application/json")
+                .GET()
+                .build();
+        return objectMapper.readValue(client.send(request, HttpResponse.BodyHandlers.ofString()).body(), new TypeReference<>() {
+        });
+    }
+
+    @SneakyThrows
     public List<ItemQuantity> getShopItems(Long shopId) {
         HttpClient client = HttpClient.newHttpClient();
         UriComponents uriComponents = UriComponentsBuilder.fromUri(URI.create(baseUrl + "/api/shop"))

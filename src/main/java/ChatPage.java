@@ -4,20 +4,18 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandler;
 import org.springframework.web.socket.WebSocketHttpHeaders;
-import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import javax.swing.*;
-import java.lang.reflect.Type;
-import java.util.Scanner;
 
 public class ChatPage extends JFrame {
     private JPanel chatPanel;
     private JTextArea messageArea;
     private JTextField messageText;
     private JButton sendButton;
+    private JComboBox shopList;
 
     public ChatPage() {
         initialize();
@@ -29,6 +27,11 @@ public class ChatPage extends JFrame {
         WebSocketStompClient stompClient = new WebSocketStompClient(client);
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
         WebSocketHttpHeaders webSocketHttpHeaders = new WebSocketHttpHeaders();
+        BackendClient.instance
+                .getShops()
+                .stream()
+                .filter(x -> !x.getId().equals(BackendClient.instance.getWorkerInformation().getShopId()))
+                .forEach(shop -> shopList.addItem(shop.getId()));
         webSocketHttpHeaders.add("Authorization", "Bearer " + BackendClient.instance.getWorkerInformation().getJwt().getAccessToken());
         StompSessionHandler sessionHandler = new StompSessionHandler() {
 
@@ -40,25 +43,25 @@ public class ChatPage extends JFrame {
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 Message casted = (Message) payload;
-                System.out.println(casted);
+                messageArea.append(casted.getSender() + ": " + casted.getContent() + "\n");
+                shopList.setEnabled(false);
             }
 
             @Override
             public void afterConnected(
                     StompSession session, StompHeaders connectedHeaders) {
                 // Subscribe to the Public Topic
-                session.subscribe("/topic/public", this);
+//                session.subscribe("/topic/public", this);
                 session.subscribe("/user/queue/specific-user", this);
                 // Tell your username to the server
                 // session.send("/app/chat.register",userName);
                 sendButton.addActionListener(e -> {
                     Message message = new Message();
-                    message.setSender(userName);
                     message.setContent(messageText.getText());
-                    message.setType(Message.MessageType.CHAT);
+                    message.setShopId((Long) shopList.getSelectedItem());
 //                    session.send("/app/chat.send", message);
                     session.send("/app/secured/room", message);
-                    messageArea.append(message.getSender() + ": " + message.getContent() + "\n");
+                    messageArea.append(BackendClient.instance.getWorkerInformation().getConnectedWorkerName() + ": " + message.getContent() + "\n");
                 });
 
             }
@@ -77,19 +80,6 @@ public class ChatPage extends JFrame {
             }
         };
         stompClient.connect("ws://localhost:8080/chat", webSocketHttpHeaders, sessionHandler);
-    }
-
-
-    public void onMessageReceived(Message message) {
-
-        if (message.getType() == Message.MessageType.JOIN) {
-
-        } else if (message.getType() == Message.MessageType.LEAVE) {
-
-        } else {
-
-        }
-
     }
 
     public static JFrame instance() {
