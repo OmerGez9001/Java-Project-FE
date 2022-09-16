@@ -1,3 +1,4 @@
+import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaders;
@@ -9,6 +10,8 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class ChatPage extends JFrame {
     private JPanel chatPanel;
@@ -22,7 +25,6 @@ public class ChatPage extends JFrame {
     }
 
     private void initialize() {
-        String userName = BackendClient.instance.getWorkerInformation().getConnectedWorkerName();
         WebSocketClient client = new StandardWebSocketClient();
         WebSocketStompClient stompClient = new WebSocketStompClient(client);
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
@@ -82,12 +84,24 @@ public class ChatPage extends JFrame {
         stompClient.connect("ws://localhost:8080/chat", webSocketHttpHeaders, sessionHandler);
     }
 
+
     public static JFrame instance() {
         ChatPage jFrame = new ChatPage();
         jFrame.setContentPane(jFrame.chatPanel);
         jFrame.pack();
+        jFrame.setLocationRelativeTo(null);
+        jFrame.setSize(300,400);
         jFrame.setVisible(true);
+//        jFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+//        jFrame.addWindowListener(new WindowAdapter() {
+//            @Override
+//            public void windowClosing(WindowEvent e) {
+//                jFrame.dispose();
+//            }
+//        });
         return jFrame;
     }
+
+
 }
 

@@ -36,6 +36,8 @@ public class ActionsPage extends JFrame {
         jFrame.setContentPane(jFrame.panel1);
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.pack();
+        jFrame.setLocationRelativeTo(null);
+        jFrame.setSize(250,250);
         jFrame.setVisible(true);
         return jFrame;
     }
