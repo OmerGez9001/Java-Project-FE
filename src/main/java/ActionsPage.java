@@ -7,14 +7,19 @@ public class ActionsPage extends JFrame {
     private JButton currentShopInformationButton;
     private JButton customerInformationButton;
     private JButton logsButton;
-    private JButton chatButton;
+    private JButton logoutButton;
 
     public ActionsPage() throws HeadlessException {
         workersButton.addActionListener(e -> WorkersPage.instance());
         currentShopInformationButton.addActionListener(e -> ShopPage.instance());
         customerInformationButton.addActionListener(e -> CustomerPage.instance());
         logsButton.addActionListener(e -> LogPage.instance());
-        chatButton.addActionListener(e -> ChatPage.instance());
+
+        logoutButton.addActionListener(e -> {
+            LoginPage.instance();
+            BackendClient.instance.disconnect();
+            this.dispose();
+        });
 
         if (!BackendClient.instance.getWorkerInformation().getJobs().contains(Job.ADMIN))
             workersButton.setVisible(false);
@@ -25,8 +30,8 @@ public class ActionsPage extends JFrame {
     }
 
     public static JFrame instance() {
-        JFrame jFrame = new ActionsPage();
-        jFrame.setContentPane(new ActionsPage().panel1);
+        ActionsPage jFrame = new ActionsPage();
+        jFrame.setContentPane(jFrame.panel1);
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.pack();
         jFrame.setVisible(true);

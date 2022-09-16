@@ -29,6 +29,10 @@ public class BackendClient {
     private BackendClient() {
     }
 
+    public void disconnect(){
+        workerInformation = null;
+
+    }
     @SneakyThrows
     public void authenticate(String username, String password) {
         HttpClient client = HttpClient.newHttpClient();
