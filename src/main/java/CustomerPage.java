@@ -25,40 +25,40 @@ public class CustomerPage extends JFrame {
         String[][] data = customers.stream().map(x -> new String[]{x.getType(), x.getId(), x.getFullName(), x.getPhoneNumber()}).toArray(String[][]::new);
         DefaultTableModel model = new DefaultTableModel(data, columns);
 
-        JTable workersTable = new JTable(model);
-        JScrollPane scrollPane = new JScrollPane(workersTable);
+        customerTable = new JTable(model);
+        JScrollPane scrollPane = new JScrollPane(customerTable);
         this.getContentPane().add(scrollPane);
         this.pack();
         this.setVisible(true);
-        workersTable.getModel().addTableModelListener(e ->
+        customerTable.getModel().addTableModelListener(e ->
         {
             if (e.getType() == TableModelEvent.UPDATE)
                 try {
-                    backendClient.upsertCustomer(transformer.fromCustomerPage(workersTable, e.getFirstRow()));
+                    backendClient.upsertCustomer(transformer.fromCustomerPage(customerTable, e.getFirstRow()));
                 } catch (Exception exception) {
                     log.error(exception);
                 }
 
         });
-        InputMap im = workersTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        InputMap im = customerTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         Object deleteKey = new Object();
         Object createKey = new Object();
 
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), deleteKey);
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), createKey);
-        workersTable.getActionMap().put(deleteKey, new AbstractAction() {
+        customerTable.getActionMap().put(deleteKey, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                int selectedRow = workersTable.getSelectedRow();
-                backendClient.deleteWorker((String) workersTable.getValueAt(selectedRow, 0));
-                DefaultTableModel model1 = (DefaultTableModel) workersTable.getModel();
+                int selectedRow = customerTable.getSelectedRow();
+                backendClient.deleteCustomer((String) customerTable.getValueAt(selectedRow, 1));
+                DefaultTableModel model1 = (DefaultTableModel) customerTable.getModel();
                 model1.removeRow(selectedRow);
             }
         });
-        workersTable.getActionMap().put(createKey, new AbstractAction() {
+        customerTable.getActionMap().put(createKey, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DefaultTableModel model1 = (DefaultTableModel) workersTable.getModel();
+                DefaultTableModel model1 = (DefaultTableModel) customerTable.getModel();
                 model1.addRow(new String[]{"", "", "", ""});
             }
         });

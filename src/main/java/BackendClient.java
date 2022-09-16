@@ -113,6 +113,21 @@ public class BackendClient {
     }
 
     @SneakyThrows
+    public void deleteCustomer(String workerId) {
+        HttpClient client = HttpClient.newHttpClient();
+        UriComponents uriComponents = UriComponentsBuilder.fromUri(URI.create(baseUrl + "/api/customer"))
+                .path("/" + workerId)
+                .build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uriComponents.toUri())
+                .header("Authorization", "Bearer " + workerInformation.getJwt().getAccessToken())
+                .header("Content-Type", "application/json")
+                .DELETE()
+                .build();
+        client.send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    @SneakyThrows
     public Shop getShop(Long shopId) {
         HttpClient client = HttpClient.newHttpClient();
         UriComponents uriComponents = UriComponentsBuilder.fromUri(URI.create(baseUrl + "/api/shop"))
