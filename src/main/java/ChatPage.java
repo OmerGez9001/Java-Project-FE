@@ -9,6 +9,9 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandler;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.util.concurrent.SuccessCallback;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -16,6 +19,8 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -29,10 +34,12 @@ public class ChatPage extends JFrame {
     private JComboBox ownWorkersInChat;
     private JButton joinChatButton;
     private JButton saveChat;
+    private StompSession session;
 
     public ChatPage() {
         initialize();
     }
+
 
     private void initialize() {
         WebSocketClient client = new StandardWebSocketClient();
@@ -46,6 +53,7 @@ public class ChatPage extends JFrame {
                 .forEach(shop -> shopList.addItem(shop.getId()));
         webSocketHttpHeaders.add("Authorization", "Bearer " + BackendClient.instance.getWorkerInformation().getJwt().getAccessToken());
 
+
         if (BackendClient.instance.getWorkerInformation().getJobs().contains(Job.SHIFT_SUPERVISOR)) {
             BackendClient.instance.allWorkersInChat().forEach(x -> ownWorkersInChat.addItem(x));
         } else {
@@ -56,7 +64,7 @@ public class ChatPage extends JFrame {
             BackendClient.instance.addManagerToChat(String.valueOf(ownWorkersInChat.getSelectedItem()));
         });
 
-        saveChat.addActionListener(l ->{
+        saveChat.addActionListener(l -> {
             XWPFDocument document = new XWPFDocument();
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             XWPFParagraph paragraph = document.createParagraph();
@@ -66,16 +74,22 @@ public class ChatPage extends JFrame {
             header.setText("Chat data:");
             header.addBreak();
             String[] text = messageArea.getText().split("\r\n");
-            for(String line:text){
+            for (String line : text) {
                 XWPFRun body = paragraph.createRun();
                 body.setText(line);
                 body.addBreak();
             }
-            try {document.write(outputStream);
-            } catch (IOException e) {throw new RuntimeException(e);}
+            try {
+                document.write(outputStream);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             writeToFile(outputStream);
-            try {outputStream.close();
-            } catch (IOException e) {throw new RuntimeException(e);}
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         });
 
         StompSessionHandler sessionHandler = new StompSessionHandler() {
@@ -119,10 +133,20 @@ public class ChatPage extends JFrame {
 
             }
         };
-        stompClient.connect("ws://localhost:8080/chat", webSocketHttpHeaders, sessionHandler);
+        ListenableFuture<StompSession> connect = stompClient.connect("ws://localhost:8080/chat", webSocketHttpHeaders, sessionHandler);
+        connect.addCallback(new ListenableFutureCallback<>() {
+            @Override
+            public void onFailure(Throwable ex) {}
+
+            @Override
+            public void onSuccess(StompSession result) {
+                session = result;
+            }
+        });
     }
+
     @SneakyThrows
-    public void writeToFile(ByteArrayOutputStream outputStream){
+    public void writeToFile(ByteArrayOutputStream outputStream) {
         JFileChooser fileChooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Word File", "docx");
         fileChooser.setFileFilter(filter);
@@ -142,7 +166,18 @@ public class ChatPage extends JFrame {
         jFrame.setLocationRelativeTo(null);
         jFrame.setSize(300, 400);
         jFrame.setVisible(true);
+        jFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        jFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+
+                jFrame.dispose();
+                jFrame.session.disconnect();
+            }
+        });
+
         return jFrame;
+
     }
 
 
