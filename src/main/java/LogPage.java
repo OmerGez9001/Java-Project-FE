@@ -120,11 +120,11 @@ public class LogPage extends JFrame {
             XWPFRun header = paragraph.createRun();
             header.setBold(true);
             header.setFontSize(16);
-            header.setText("");
+            header.setText(workerLog.getWorkerId());
             header.addBreak();
 
             XWPFRun body = paragraph.createRun();
-            body.setText("");
+            body.setText(workerLog.getRegisterAction().toString());
             body.addBreak();
             body.addBreak();
         }
@@ -142,11 +142,11 @@ public class LogPage extends JFrame {
             XWPFRun header = paragraph.createRun();
             header.setBold(true);
             header.setFontSize(16);
-            header.setText("");
+            header.setText(customerLog.getRegisterId());
             header.addBreak();
 
             XWPFRun body = paragraph.createRun();
-            body.setText("");
+            body.setText(customerLog.getRegisterAction().toString());
             body.addBreak();
             body.addBreak();
         }
