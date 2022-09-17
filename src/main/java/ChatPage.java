@@ -1,3 +1,9 @@
+import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaders;
@@ -9,6 +15,10 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 
 public class ChatPage extends JFrame {
     private JPanel chatPanel;
@@ -18,6 +28,7 @@ public class ChatPage extends JFrame {
     private JComboBox shopList;
     private JComboBox ownWorkersInChat;
     private JButton joinChatButton;
+    private JButton saveChat;
 
     public ChatPage() {
         initialize();
@@ -45,6 +56,28 @@ public class ChatPage extends JFrame {
             BackendClient.instance.addManagerToChat(String.valueOf(ownWorkersInChat.getSelectedItem()));
         });
 
+        saveChat.addActionListener(l ->{
+            XWPFDocument document = new XWPFDocument();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            XWPFParagraph paragraph = document.createParagraph();
+            XWPFRun header = paragraph.createRun();
+            header.setBold(true);
+            header.setFontSize(16);
+            header.setText("Chat data:");
+            header.addBreak();
+            String[] text = messageArea.getText().split("\r\n");
+            for(String line:text){
+                XWPFRun body = paragraph.createRun();
+                body.setText(line);
+                body.addBreak();
+            }
+            try {document.write(outputStream);
+            } catch (IOException e) {throw new RuntimeException(e);}
+            writeToFile(outputStream);
+            try {outputStream.close();
+            } catch (IOException e) {throw new RuntimeException(e);}
+        });
+
         StompSessionHandler sessionHandler = new StompSessionHandler() {
 
             @Override
@@ -55,7 +88,7 @@ public class ChatPage extends JFrame {
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 Message casted = (Message) payload;
-                messageArea.append(casted.getSender() + ": " + casted.getContent() + "\n");
+                messageArea.append(casted.getSender() + ": " + casted.getContent() + System.lineSeparator());
                 shopList.setEnabled(false);
             }
 
@@ -68,7 +101,7 @@ public class ChatPage extends JFrame {
                     message.setContent(messageText.getText());
                     message.setShopId((Long) shopList.getSelectedItem());
                     session.send("/app/secured/room", message);
-                    messageArea.append(BackendClient.instance.getWorkerInformation().getConnectedWorkerName() + ": " + message.getContent() + "\n");
+                    messageArea.append(BackendClient.instance.getWorkerInformation().getConnectedWorkerName() + ": " + message.getContent() + System.lineSeparator());
                 });
 
             }
@@ -88,7 +121,19 @@ public class ChatPage extends JFrame {
         };
         stompClient.connect("ws://localhost:8080/chat", webSocketHttpHeaders, sessionHandler);
     }
-
+    @SneakyThrows
+    public void writeToFile(ByteArrayOutputStream outputStream){
+        JFileChooser fileChooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Word File", "docx");
+        fileChooser.setFileFilter(filter);
+        fileChooser.setVisible(true);
+        fileChooser.showSaveDialog(chatPanel);
+        File currFile = fileChooser.getSelectedFile();
+        if (!FilenameUtils.getExtension(currFile.getName()).equalsIgnoreCase("docx")) {
+            currFile = new File(currFile.toString() + ".docx");
+        }
+        FileUtils.writeByteArrayToFile(currFile, outputStream.toByteArray());
+    }
 
     public static JFrame instance() {
         ChatPage jFrame = new ChatPage();
