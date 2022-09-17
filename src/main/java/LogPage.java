@@ -3,10 +3,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import java.io.*;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.Callable;
 
-import ch.qos.logback.core.util.FileUtil;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -19,6 +16,8 @@ public class LogPage extends JFrame {
     private JButton categorySalesButton;
     private JPanel panel1;
     private JButton export;
+    private JButton customerRegisteryButton;
+    private JButton workerRegisterButton;
     private JTable jTable;
 
     private Runnable logReport = null;
@@ -28,6 +27,7 @@ public class LogPage extends JFrame {
         super();
         panel1 = new JPanel();
         String[] columns = {"Name", "Quantity"};
+        String[] registeryColumns = {"ID", "Worker ID", "Register ID", "Register Action"};
 
         createTable(columns);
 
@@ -35,6 +35,8 @@ public class LogPage extends JFrame {
         panel1.add(shopSalesButton);
         panel1.add(categorySalesButton);
         panel1.add(export);
+        panel1.add(customerRegisteryButton);
+        panel1.add(workerRegisterButton);
 
 
         itemsSalesButton.addActionListener(l -> {
@@ -76,6 +78,9 @@ public class LogPage extends JFrame {
             };
 
         });
+
+        customerRegisteryButton.addActionListener(l->{});
+        workerRegisterButton.addActionListener(l->{});
 
         export.addActionListener(l -> {
             if (logReport != null){
