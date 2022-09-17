@@ -273,6 +273,33 @@ public class BackendClient {
     }
 
     @SneakyThrows
+    public List<RegisterLog> getWorkerLog() {
+
+        HttpClient client = HttpClient.newHttpClient();
+        UriComponents uriComponents = UriComponentsBuilder.fromUri(URI.create(baseUrl + "/api/report/worker"))
+                .build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uriComponents.toUri())
+                .header("Authorization", "Bearer " + workerInformation.getJwt().getAccessToken())
+                .build();
+        return objectMapper.readValue(client.send(request, HttpResponse.BodyHandlers.ofString()).body(), new TypeReference<>() {
+        });
+    }
+
+    @SneakyThrows
+    public List<RegisterLog> getCustomerLog() {
+        HttpClient client = HttpClient.newHttpClient();
+        UriComponents uriComponents = UriComponentsBuilder.fromUri(URI.create(baseUrl + "/api/report/customer"))
+                .build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uriComponents.toUri())
+                .header("Authorization", "Bearer " + workerInformation.getJwt().getAccessToken())
+                .build();
+        return objectMapper.readValue(client.send(request, HttpResponse.BodyHandlers.ofString()).body(), new TypeReference<>() {
+        });
+    }
+
+    @SneakyThrows
     public List<SellsPerCategoryReport> getCategoryLog() {
 
         HttpClient client = HttpClient.newHttpClient();
