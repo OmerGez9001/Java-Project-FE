@@ -50,7 +50,7 @@ public class CustomerPage extends JFrame {
             @Override
             public void actionPerformed(ActionEvent event) {
                 int selectedRow = workersTable.getSelectedRow();
-                backendClient.deleteWorker((String) workersTable.getValueAt(selectedRow, 0));
+                backendClient.deleteCustomer((String) workersTable.getValueAt(selectedRow, 1));
                 DefaultTableModel model1 = (DefaultTableModel) workersTable.getModel();
                 model1.removeRow(selectedRow);
             }

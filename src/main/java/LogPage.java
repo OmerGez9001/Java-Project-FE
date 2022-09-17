@@ -26,7 +26,7 @@ public class LogPage extends JFrame {
         super();
         panel1 = new JPanel();
         String[] columns = {"Name", "Quantity"};
-        String[] registeryColumns = {"ID", "Worker ID", "Register ID", "Register Action"};
+        String[] registeryColumns = {"Worker ID", "Register ID", "Register Action"};
 
         createTable(columns);
 
@@ -78,14 +78,81 @@ public class LogPage extends JFrame {
 
         });
 
-        customerRegisteryButton.addActionListener(l->{});
-        workerRegisterButton.addActionListener(l->{});
+        customerRegisteryButton.addActionListener(l->{
+            List<RegisterLog> customerLog = backendClient.getCustomerLog();
+            String[][] data= customerLog.stream().map(x-> new String[]{x.getWorkerId(), x.getRegisterId(), x.getRegisterAction().toString()}).toArray(String[][]::new);
+            ((DefaultTableModel) jTable.getModel()).setDataVector(data, registeryColumns);
+            logReport = ()->{
+                try {
+                    createWordDocForCustomerRegistration(customerLog);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        });
+
+        workerRegisterButton.addActionListener(l->{
+            List<RegisterLog> workerLog = backendClient.getWorkerLog();
+            String[][] data= workerLog.stream().map(x-> new String[]{}).toArray(String[][]::new);
+            ((DefaultTableModel) jTable.getModel()).setDataVector(data, registeryColumns);
+            logReport = ()->{
+                try {
+                    createWordDocForWorkerRegistration(workerLog);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        });
 
         export.addActionListener(l -> {
             if (logReport != null){
                 logReport.run();
             }
         });
+    }
+
+    public void createWordDocForWorkerRegistration(List<RegisterLog> workersLog) throws IOException {
+        XWPFDocument document = new XWPFDocument();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        XWPFParagraph paragraph = document.createParagraph();
+
+        for (RegisterLog workerLog : workersLog) {
+            XWPFRun header = paragraph.createRun();
+            header.setBold(true);
+            header.setFontSize(16);
+            header.setText("");
+            header.addBreak();
+
+            XWPFRun body = paragraph.createRun();
+            body.setText("");
+            body.addBreak();
+            body.addBreak();
+        }
+        document.write(outputStream);
+        writeToFile(outputStream);
+        outputStream.close();
+    }
+
+    public void createWordDocForCustomerRegistration(List<RegisterLog> customersLog) throws IOException {
+        XWPFDocument document = new XWPFDocument();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        XWPFParagraph paragraph = document.createParagraph();
+
+        for (RegisterLog customerLog : customersLog) {
+            XWPFRun header = paragraph.createRun();
+            header.setBold(true);
+            header.setFontSize(16);
+            header.setText("");
+            header.addBreak();
+
+            XWPFRun body = paragraph.createRun();
+            body.setText("");
+            body.addBreak();
+            body.addBreak();
+        }
+        document.write(outputStream);
+        writeToFile(outputStream);
+        outputStream.close();
     }
 
     public void createWordDocForShops(List<SellsPerShopReport> sellsPerShopReports) throws IOException {
