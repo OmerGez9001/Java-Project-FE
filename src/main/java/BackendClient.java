@@ -29,10 +29,11 @@ public class BackendClient {
     private BackendClient() {
     }
 
-    public void disconnect(){
+    public void disconnect() {
         workerInformation = null;
 
     }
+
     @SneakyThrows
     public void authenticate(String username, String password) {
         HttpClient client = HttpClient.newHttpClient();
@@ -50,7 +51,7 @@ public class BackendClient {
         });
 
         DecodedJWT decodedJWT = JWT.decode(jwt.getAccessToken());
-        workerInformation = new WorkerInformation(jwt, decodedJWT.getClaims().get("roles").asList(Job.class), decodedJWT.getClaims().get("shop").as(Long.class),username);
+        workerInformation = new WorkerInformation(jwt, decodedJWT.getClaims().get("roles").asList(Job.class), decodedJWT.getClaims().get("shop").as(Long.class), username);
     }
 
     @SneakyThrows
@@ -65,6 +66,35 @@ public class BackendClient {
                 .build();
         return objectMapper.readValue(client.send(request, HttpResponse.BodyHandlers.ofString()).body(), new TypeReference<>() {
         });
+    }
+
+    @SneakyThrows
+    public List<String> allWorkersInChat() {
+
+        HttpClient client = HttpClient.newHttpClient();
+        UriComponents uriComponents = UriComponentsBuilder.fromUri(URI.create(baseUrl + "/api/chat"))
+                .build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uriComponents.toUri())
+                .header("Authorization", "Bearer " + workerInformation.getJwt().getAccessToken())
+                .build();
+        return objectMapper.readValue(client.send(request, HttpResponse.BodyHandlers.ofString()).body(), new TypeReference<>() {
+        });
+    }
+
+    @SneakyThrows
+    public void addManagerToChat(String workerId) {
+        HttpClient client = HttpClient.newHttpClient();
+        UriComponents uriComponents = UriComponentsBuilder.fromUri(URI.create(baseUrl + "/api/chat"))
+                .path("/" + workerId)
+                .build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uriComponents.toUri())
+                .header("Authorization", "Bearer " + workerInformation.getJwt().getAccessToken())
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
+        client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     @SneakyThrows
@@ -179,6 +209,7 @@ public class BackendClient {
         return objectMapper.readValue(client.send(request, HttpResponse.BodyHandlers.ofString()).body(), new TypeReference<>() {
         });
     }
+
     @SneakyThrows
     public List<Customer> allCustomers() {
         HttpClient client = HttpClient.newHttpClient();
@@ -226,6 +257,7 @@ public class BackendClient {
 
 
     }
+
     @SneakyThrows
     public List<SellsPerShopReport> getShopLog() {
 
@@ -239,6 +271,7 @@ public class BackendClient {
         return objectMapper.readValue(client.send(request, HttpResponse.BodyHandlers.ofString()).body(), new TypeReference<>() {
         });
     }
+
     @SneakyThrows
     public List<SellsPerCategoryReport> getCategoryLog() {
 
@@ -252,6 +285,7 @@ public class BackendClient {
         return objectMapper.readValue(client.send(request, HttpResponse.BodyHandlers.ofString()).body(), new TypeReference<>() {
         });
     }
+
     @SneakyThrows
     public List<SellsPerItemReport> getItemLog() {
 
@@ -265,6 +299,7 @@ public class BackendClient {
         return objectMapper.readValue(client.send(request, HttpResponse.BodyHandlers.ofString()).body(), new TypeReference<>() {
         });
     }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

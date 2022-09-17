@@ -1,4 +1,3 @@
-import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaders;
@@ -10,8 +9,6 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import javax.swing.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 public class ChatPage extends JFrame {
     private JPanel chatPanel;
@@ -19,6 +16,8 @@ public class ChatPage extends JFrame {
     private JTextField messageText;
     private JButton sendButton;
     private JComboBox shopList;
+    private JComboBox ownWorkersInChat;
+    private JButton joinChatButton;
 
     public ChatPage() {
         initialize();
@@ -35,6 +34,17 @@ public class ChatPage extends JFrame {
                 .filter(x -> !x.getId().equals(BackendClient.instance.getWorkerInformation().getShopId()))
                 .forEach(shop -> shopList.addItem(shop.getId()));
         webSocketHttpHeaders.add("Authorization", "Bearer " + BackendClient.instance.getWorkerInformation().getJwt().getAccessToken());
+
+        if (BackendClient.instance.getWorkerInformation().getJobs().contains(Job.SHIFT_SUPERVISOR)) {
+            BackendClient.instance.allWorkersInChat().forEach(x -> ownWorkersInChat.addItem(x));
+        } else {
+            ownWorkersInChat.setVisible(false);
+            joinChatButton.setVisible(false);
+        }
+        joinChatButton.addActionListener(l -> {
+            BackendClient.instance.addManagerToChat(String.valueOf(ownWorkersInChat.getSelectedItem()));
+        });
+
         StompSessionHandler sessionHandler = new StompSessionHandler() {
 
             @Override
@@ -52,16 +62,11 @@ public class ChatPage extends JFrame {
             @Override
             public void afterConnected(
                     StompSession session, StompHeaders connectedHeaders) {
-                // Subscribe to the Public Topic
-//                session.subscribe("/topic/public", this);
                 session.subscribe("/user/queue/specific-user", this);
-                // Tell your username to the server
-                // session.send("/app/chat.register",userName);
                 sendButton.addActionListener(e -> {
                     Message message = new Message();
                     message.setContent(messageText.getText());
                     message.setShopId((Long) shopList.getSelectedItem());
-//                    session.send("/app/chat.send", message);
                     session.send("/app/secured/room", message);
                     messageArea.append(BackendClient.instance.getWorkerInformation().getConnectedWorkerName() + ": " + message.getContent() + "\n");
                 });
@@ -90,15 +95,8 @@ public class ChatPage extends JFrame {
         jFrame.setContentPane(jFrame.chatPanel);
         jFrame.pack();
         jFrame.setLocationRelativeTo(null);
-        jFrame.setSize(300,400);
+        jFrame.setSize(300, 400);
         jFrame.setVisible(true);
-//        jFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-//        jFrame.addWindowListener(new WindowAdapter() {
-//            @Override
-//            public void windowClosing(WindowEvent e) {
-//                jFrame.dispose();
-//            }
-//        });
         return jFrame;
     }
 
