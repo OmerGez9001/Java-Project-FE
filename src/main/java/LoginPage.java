@@ -1,10 +1,11 @@
 import javax.swing.*;
 
 public class LoginPage extends JFrame {
-    private JPanel panel1;
+    private JPanel userID;
     private JTextField textField1;
     private JPasswordField passwordField1;
     private JButton loginButton;
+    private JLabel loginHeader;
 
     public LoginPage() {
         super();
@@ -17,7 +18,7 @@ public class LoginPage extends JFrame {
 
     public static JFrame instance() {
         LoginPage jFrame = new LoginPage();
-        jFrame.setContentPane(jFrame.panel1);
+        jFrame.setContentPane(jFrame.userID);
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.pack();
         jFrame.setLocationRelativeTo(null);

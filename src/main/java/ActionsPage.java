@@ -9,8 +9,10 @@ public class ActionsPage extends JFrame {
     private JButton logsButton;
     private JButton logoutButton;
     private JButton chatButton;
+    private JLabel helloText;
 
     public ActionsPage() throws HeadlessException {
+        helloText.setText("Hello, " + BackendClient.instance.getWorkerInformation().getConnectedWorkerName());
         workersButton.addActionListener(e -> WorkersPage.instance());
         currentShopInformationButton.addActionListener(e -> ShopPage.instance());
         customerInformationButton.addActionListener(e -> CustomerPage.instance());
